@@ -29,7 +29,7 @@ const Login = () => {
                     <button>Sign in</button>
                     {err && <span>Oops! Something went wrong.</span>}
                 </form>
-                <p>You don't have an account? <Link to="/register">Register</Link></p>
+                <p>You don't have an account? <Link to="/register" className="link">Register</Link></p>
             </div>
         </div>
     )
