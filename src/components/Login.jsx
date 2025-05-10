@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate , Link } from "react-router-dom";
-import { auth } from "../Firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, googleAuthProvider } from "../Firebase";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import google from "./Images/google.png";
 
 const Login = () => {
     const [err, setErr] = useState(false);
@@ -18,18 +19,33 @@ const Login = () => {
             setErr(true);
         }
     };
+    const googleLogin = async () => {
+        try {
+            await signInWithPopup(auth, googleAuthProvider);
+            navigate("/");
+        }
+        catch(err) {
+            setErr(true);
+        }
+    };
     return (
         <div className = "formContainer">
             <div className = "formWrapper">
                 <span className = "logo">Friend Chat</span>
                 <span className = "title">Login</span>
                 <form onSubmit={handleSubmit}>
-                    <input type = "email" placeholder = "Enter email" />
-                    <input type = "password" placeholder = "Enter password" />
+                    <input type = "email" placeholder = "Enter email" required />
+                    <input type = "password" placeholder = "Enter password" required />
                     <button>Sign in</button>
                     {err && <span>Oops! Something went wrong.</span>}
                 </form>
-                <p>You don't have an account? <Link to="/register" className="link">Register</Link></p>
+                <div>
+                    <button className="LoginButton" onClick={googleLogin}><img className="loginimg" src={google} alt="" /></button>
+                </div>
+                <div className="links">
+                    <button className="navlink1"><Link to="/login" className="link">Login</Link></button>
+                    <button className="navlink2"><Link to="/register" className="link">Register</Link></button>
+                </div>
             </div>
         </div>
     )
