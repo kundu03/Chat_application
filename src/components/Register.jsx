@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Add from "./Images/addavatar.png"; 
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { auth, db, storage, googleAuthProvider} from "../Firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc , setDoc } from "firebase/firestore";
@@ -42,7 +42,9 @@ const Register = () => {
                           photoURL: downloadURL,
                         });
                         await setDoc(doc(db, "userChats", res.user.uid), {});
-                        navigate("/");
+                        await sendEmailVerification(res.user);
+                        navigate("/login");
+                        alert("Please check your inbox to verify your email.");
                       } catch (err) {
                         setErr(true);
                         setLoading(false);
@@ -52,7 +54,15 @@ const Register = () => {
             }
             catch(err) {
                 setErr(true);
-                setError("Oops, Something Went Wrong!!!")
+                if(err.code === "auth/invalid-email") {
+                    setError("Invalid email id.");
+                } else if(err.code === "auth/email-already-in-use") {
+                    setError("User already exists with this email.");
+                } else if(err.code === "auth/weak-password") {
+                    setError("Weak Password - minimum 6 chars.")
+                } else {
+                    setError("Oops! Something went wrong.!!!");
+                }
                 setLoading(false);
             }
         }
@@ -64,6 +74,11 @@ const Register = () => {
         }
         catch(err) {
             setErr(true);
+            if(err.code === "auth/account-exists-with-different-credential") {
+                setError("User already exists with this email.");
+            } else {
+                setError("Oops! Something went wrong.!!!");
+            }
         }
     };
     return (
@@ -81,8 +96,8 @@ const Register = () => {
                         <span>Add an avatar</span>
                     </label>
                     <button disabled={loading}>Sign up</button>
-                    {loading && "Uploading the image please wait..."}
-                    {err && <span>{error}</span>}
+                    {loading && <span className="error">Uploading the image please wait...</span>}
+                    {err && <span className="error">{error}</span>}
                 </form>
                 <div>
                     <button className="LoginButton" onClick={googleLogin}><img className="loginimg" src={google} alt="" /></button>
